@@ -9,6 +9,7 @@ type Codec interface {
 	// Encoders and decoders used at the server side.
 	DecodeRequestParam(name, value string, out interface{}) error
 	DecodeRequestBody(body io.ReadCloser, out interface{}) error
+	SuccessResponse(body interface{}) interface{} // Primarily used for OAS doc generation.
 	EncodeSuccessResponse(w http.ResponseWriter, statusCode int, body interface{}) error
 	EncodeFailureResponse(w http.ResponseWriter, err error) error
 

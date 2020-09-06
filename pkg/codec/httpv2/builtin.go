@@ -66,10 +66,14 @@ func (jc JSONCodec) DecodeRequestBody(body io.ReadCloser, out interface{}) error
 	return nil
 }
 
+func (jc JSONCodec) SuccessResponse(body interface{}) interface{} {
+	return body
+}
+
 func (jc JSONCodec) EncodeSuccessResponse(w http.ResponseWriter, statusCode int, body interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
-	return json.NewEncoder(w).Encode(body)
+	return json.NewEncoder(w).Encode(jc.SuccessResponse(body))
 }
 
 func (jc JSONCodec) EncodeFailureResponse(w http.ResponseWriter, err error) error {
