@@ -13,6 +13,12 @@ type Options struct {
 	Formatted bool
 }
 
+// template, data
+// text is template string
+// data := struct {
+//		Result     *reflector.Result
+//		DocMethods []*reflector.Method
+// }
 func Generate(text string, data interface{}, opts Options) ([]byte, error) {
 	tmpl, err := template.New(opts.Name).Funcs(opts.Funcs).Parse(text)
 	if err != nil {

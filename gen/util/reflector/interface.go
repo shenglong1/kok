@@ -121,6 +121,7 @@ type Interface struct {
 	Methods []*Method
 }
 
+// ReflectInterface interface parse 到interface obj
 func ReflectInterface(srcDir, pkgName, objName string) (*Result, error) {
 	srcPkgType, pkgPath, pkgName := GetPkgInfo(srcDir, pkgName)
 	obj := srcPkgType.Scope().Lookup(objName)

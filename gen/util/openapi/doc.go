@@ -13,6 +13,7 @@ var (
 	reKok = regexp.MustCompile(`@kok\((\w+)\):\s*"(.+)"`)
 )
 
+// result 提供函数名和参数详情，doc提供method pattern
 func FromDoc(result *reflector.Result, doc map[string][]string) (*Specification, error) {
 	spec := &Specification{}
 
@@ -37,10 +38,12 @@ func FromDoc(result *reflector.Result, doc map[string][]string) (*Specification,
 			// Build the mapping for later manipulation.
 			params[p.Name] = p
 		}
+		// 从接口定义中获得每个函数的所有参数定义, 一个函数对应一个operation和params
 
 		// Set a default success response.
 		op.Resp(http.StatusOK, MediaTypeJSON, nil)
 
+		// 注释填充operation
 		if err := manipulateByComments(op, params, comments); err != nil {
 			return nil, err
 		}
@@ -51,6 +54,8 @@ func FromDoc(result *reflector.Result, doc map[string][]string) (*Specification,
 	return spec, nil
 }
 
+// 注释填充operation
+// params + comment -> operation
 func manipulateByComments(op *Operation, params map[string]*Param, comments []string) error {
 	for _, comment := range comments {
 		if !strings.Contains(comment, "@kok") {
@@ -62,6 +67,7 @@ func manipulateByComments(op *Operation, params map[string]*Param, comments []st
 			return fmt.Errorf("invalid kok comment: %s", comment)
 		}
 
+		// 把注释split开
 		key, value := result[1], result[2]
 		switch key {
 		case "op":

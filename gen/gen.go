@@ -63,17 +63,21 @@ func New(opts Options) *Generator {
 }
 
 func (g *Generator) Generate(srcFilename, interfaceName, dstPkgName, testFilename string) (content Content, err error) {
+	// 从源文件获取interface obj
+	// 构造自定义的interfaceType
 	result, err := reflector.ReflectInterface(filepath.Dir(srcFilename), dstPkgName, interfaceName)
 	if err != nil {
 		return content, err
 	}
 
-	spec, err := g.getSpec(result, srcFilename, interfaceName)
+	// 拿到所有注释, map["func"] = "POST /xxx" -> operations， 这就是结构化的注释
+	spec, err := g.getSpec(result, srcFilename, interfaceName) // 生成openapi的struct
 	if err != nil {
 		return content, err
 	}
 
 	// Generate the endpoint code.
+	// 利用go template进行文本替换
 	content.Endpoint, err = g.endpoint.Generate(result, spec)
 	if err != nil {
 		return content, err
@@ -104,12 +108,17 @@ func (g *Generator) Generate(srcFilename, interfaceName, dstPkgName, testFilenam
 	return content, nil
 }
 
+// parse file -> ast.File -> interfaceType -> doc map -> operations
 func (g *Generator) getSpec(result *reflector.Result, srcFilename, interfaceName string) (*openapi.Specification, error) {
-	doc, err := reflector.GetInterfaceMethodDoc(srcFilename, interfaceName)
+	// 获得原始注释
+	// parse源文件生成ast.File->interfaceType->map[funcName] = "doc"
+	doc, err := reflector.GetInterfaceMethodDoc(srcFilename, interfaceName) // 收集interface的注释 map[methodName] = comment
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(doc)
 
+	// doc 构造为operation
 	spec, err := openapi.FromDoc(result, doc)
 	if err != nil {
 		return nil, err

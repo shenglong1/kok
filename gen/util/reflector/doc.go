@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 )
 
+// parse源文件生成ast.File->interfaceType->map[funcName] = "doc"
 func GetInterfaceMethodDoc(filename, name string) (map[string][]string, error) {
 	ifType, err := getAstInterfaceType(filename, name)
 	if err != nil {
@@ -33,6 +34,7 @@ func GetInterfaceMethodDoc(filename, name string) (map[string][]string, error) {
 	return doc, nil
 }
 
+// 生成ast.File并从中找到interfaceType
 func getAstInterfaceType(filename, name string) (*ast.InterfaceType, error) {
 	filename, _ = filepath.Abs(filename)
 
@@ -42,8 +44,8 @@ func getAstInterfaceType(filename, name string) (*ast.InterfaceType, error) {
 	}
 
 	for _, d := range f.Decls {
-		for _, s := range d.(*ast.GenDecl).Specs {
-			ts, ok := s.(*ast.TypeSpec)
+		for _, s := range d.(*ast.GenDecl).Specs { // 声明
+			ts, ok := s.(*ast.TypeSpec) // 类型定义
 			if ok && ts.Name.Name == name {
 				ifType, ok := ts.Type.(*ast.InterfaceType)
 				if !ok {
